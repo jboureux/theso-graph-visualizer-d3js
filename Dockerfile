@@ -8,11 +8,10 @@ WORKDIR /app
 COPY . .
 
 # Installer les dépendances avec PNPM
-RUN npm install -g pnpm
-RUN pnpm install
+RUN npm install
 
 # Construire l'application
-RUN pnpm run build
+RUN npm run build
 
 # Utiliser une image légère pour le déploiement
 FROM nginx:alpine
