@@ -22,3 +22,14 @@ document.querySelector("#show-data").addEventListener("click", (event) => {
         })
         .catch((reason) => alert(reason));
 });
+
+document
+    .querySelector("#show-relationships")
+    .addEventListener("change", (event) => {
+        const labels = document.querySelectorAll("textPath");
+        if (event.currentTarget.checked) {
+            labels.forEach((label) => label.classList.remove("hide-label"));
+        } else {
+            labels.forEach((label) => label.classList.add("hide-label"));
+        }
+    });
