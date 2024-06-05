@@ -26,7 +26,11 @@ export class Graph {
 
     constructor(data, language, params = DefaultGraphSettings) {
         //Initialisation des données
-        const relationshipsToInclude = ["skos__narrower", "skos__exactMatch"];
+        const relationshipsToInclude = [
+            "skos__narrower",
+            "skos__exactMatch",
+            "skos__hasTopConcept",
+        ];
         console.log(data);
         this.dataLinks = data.relationships.filter(
             (value) =>
@@ -83,34 +87,6 @@ export class Graph {
         this.linkNodeIntersectionOffset = params.LINK_NODE_INTERSECTION_OFFSET
             ? params.LINK_NODE_INTERSECTION_OFFSET
             : DefaultGraphSettings.LINK_NODE_INTERSECTION_OFFSET;
-
-        //Initialisation de la simulation des forces
-        this.simulation = d3
-            .forceSimulation(this.dataNodes)
-            .force(
-                "link",
-                d3
-                    .forceLink(this.dataLinks)
-                    .id((d) => d.id)
-                    .distance(this.linkForceDistance)
-            )
-            .force(
-                "charge",
-                d3.forceManyBody().strength(this.chargeForceStrength)
-            )
-            .on("tick", () => {
-                this.links.selectAll("path").attr("d", this.linkArc);
-
-                this.nodes
-                    .selectAll("circle")
-                    .attr("cx", (d) => d.x)
-                    .attr("cy", (d) => d.y);
-
-                this.nodes
-                    .selectAll("text")
-                    .attr("x", (d) => d.x)
-                    .attr("y", (d) => d.y);
-            });
     }
 
     onNodeDragStart = (e) => {
@@ -137,10 +113,15 @@ export class Graph {
         d3.select("g").attr("transform", event.transform);
     }
 
-    //Verifie si une relation existe dans le tableau dataThesoLinks avec comme point de départ un noeud avec l'URI passée en paramètre
-    isInTheso(uri) {
+    //Verifie si une relation existe dans le tableau dataThesoLinks avec comme point de départ le noeud passé en paramètres.
+    //Si c'est un Thésaurus, retourner l'URI du thésaurus
+    isInTheso(node) {
+        if (node.labels.includes("skos__ConceptScheme")) {
+            return node.properties.uri;
+        }
+
         const relationships = this.dataThesoLinks.filter(
-            (thesoRel) => thesoRel.start.properties.uri == uri
+            (thesoRel) => thesoRel.start.properties.uri == node.properties.uri
         );
         if (relationships.length > 0) {
             return relationships[0].end.properties.uri;
@@ -211,25 +192,36 @@ export class Graph {
 
         nodes
             .append("circle")
-            .attr("r", this.nodeRadius)
+            .attr("r", (d) =>
+                d.labels.includes("skos__ConceptScheme")
+                    ? this.nodeRadius * 2
+                    : this.nodeRadius
+            )
 
             .attr("fill", (d) =>
-                d3.color(this.color(this.isInTheso(d.properties.uri))).darker(2)
+                d3.color(this.color(this.isInTheso(d))).darker(2)
             );
 
         nodes
             .append("text")
             .text((d) => {
-                if (d.labels.includes("skos__Concept")) {
-                    return this.filterLangArray(d.properties.skos__prefLabel);
+                if (
+                    d.labels.includes("skos__Concept") ||
+                    d.labels.includes("skos__ConceptScheme")
+                ) {
+                    if (typeof d.properties.skos__prefLabel != "string") {
+                        return this.filterLangArray(
+                            d.properties.skos__prefLabel
+                        );
+                    } else {
+                        return d.properties.skos__prefLabel;
+                    }
                 } else {
                     return d.properties.uri;
                 }
             })
             .attr("fill", (d) =>
-                d3
-                    .color(this.color(this.isInTheso(d.properties.uri)))
-                    .brighter(1)
+                d3.color(this.color(this.isInTheso(d))).brighter(1)
             )
             .attr("stroke", "none")
             .attr("text-anchor", "middle")
@@ -284,6 +276,36 @@ export class Graph {
         return links;
     }
 
+    //Initialisation de la simulation des forces
+    initSimulation() {
+        this.simulation = d3
+            .forceSimulation(this.dataNodes)
+            .force(
+                "link",
+                d3
+                    .forceLink(this.dataLinks)
+                    .id((d) => d.id)
+                    .distance(this.linkForceDistance)
+            )
+            .force(
+                "charge",
+                d3.forceManyBody().strength(this.chargeForceStrength)
+            )
+            .on("tick", () => {
+                this.links.selectAll("path").attr("d", this.linkArc);
+
+                this.nodes
+                    .selectAll("circle")
+                    .attr("cx", (d) => d.x)
+                    .attr("cy", (d) => d.y);
+
+                this.nodes
+                    .selectAll("text")
+                    .attr("x", (d) => d.x)
+                    .attr("y", (d) => d.y);
+            });
+    }
+
     linkArc = (d) => {
         const source = d.source;
         const target = d.target;
@@ -318,11 +340,11 @@ export class Graph {
 
     getGraphNode() {
         this.svg = this.initGraph();
+        this.initSimulation();
         this.defineLinkArrowHead();
 
         const content = this.svg.append("g");
         this.links = this.createLinks(content);
-
         this.nodes = this.createNodes(content);
 
         return this.svg.node();
@@ -337,6 +359,7 @@ const relationships_dict = {
     ns0__isReplacedBy: "Est replacé par",
     ns0__replaces: "Remplace",
     ns2__memberOf: "Membre de",
+    skos__hasTopConcept: "Top Concept",
 };
 
 const relationships_colors = {
