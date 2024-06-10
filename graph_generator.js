@@ -1,6 +1,6 @@
 const DefaultGraphSettings = {
-    LINK_FORCE_DISTANCE: 300,
-    CHARGE_FORCE_STRENGTH: -400,
+    LINK_FORCE_DISTANCE: 200,
+    CHARGE_FORCE_STRENGTH: -200,
     NODE_RADIUS: 30,
     LINK_CURVATURE: 0.15,
     LINK_NODE_INTERSECTION_OFFSET: -5,
@@ -145,6 +145,8 @@ export class Graph {
     initGraph() {
         return d3
             .create("svg")
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
             .attr("viewBox", [
                 -this.width / 2,
                 -this.height / 2,
@@ -251,11 +253,7 @@ export class Graph {
             .attr("marker-start", "url(#arrowhead)")
             .attr("id", (d) => d.id)
             .attr("fill", "none")
-            .attr("stroke", (d) =>
-                relationships_colors[d.label]
-                    ? relationships_colors[d.label]
-                    : "#000000"
-            );
+            .attr("stroke", (d) => this.color(d.label));
 
         links
             .append("text")
@@ -360,14 +358,4 @@ const relationships_dict = {
     ns0__replaces: "Remplace",
     ns2__memberOf: "Membre de",
     skos__hasTopConcept: "Top Concept",
-};
-
-const relationships_colors = {
-    skos__broader: "#ED4E8F",
-    skos__narrower: "#ED4E8F",
-    skos__exactMatch: "#8A2BE2",
-    skos__related: "#7BC043",
-    ns0__isReplacedBy: "#35AB66",
-    ns0__replaces: "#35AB66",
-    ns2__memberOf: "#9ED5FA",
 };
