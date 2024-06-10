@@ -1,7 +1,5 @@
 import { Graph } from "./graph_generator";
-const lang = "fr";
-
-var handleResize;
+let generatedGraph;
 
 document.querySelector("#show-data").addEventListener("click", (event) => {
     const input = document.querySelector("#data-url");
@@ -16,9 +14,15 @@ document.querySelector("#show-data").addEventListener("click", (event) => {
             if (graph.hasChildNodes()) {
                 graph.removeChild(graph.firstChild);
             }
+            const lang = document.querySelector("#language-input").value;
+            if (lang == undefined || lang == "") {
+                alert("Erreur, la langue n'est pas définie");
+                return;
+            }
             //TODO gérer le resize
             //window.addEventListener("resize", handleResize);
-            graph.appendChild(new Graph(data, lang).getGraphNode());
+            generatedGraph = new Graph(data, lang);
+            graph.appendChild(generatedGraph.getGraphNode());
         })
         .catch((reason) => alert(reason));
 });
