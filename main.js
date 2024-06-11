@@ -1,4 +1,4 @@
-import { Graph } from "./graph_generator";
+import { Graph } from "./graph_generator.js";
 let generatedGraph;
 
 document.querySelector("#show-data").addEventListener("click", (event) => {
@@ -40,7 +40,11 @@ document
 
 document.querySelector("#download-svg").addEventListener("click", () => {
     const svg = document.querySelector("#graph").innerHTML;
-    download(svg, "image/svg+xml", "test.svg");
+    let filename = document.querySelector("#download-file-name").value;
+
+    if (filename == undefined || filename == "")
+        filename = `export_${new Date().getTime()}`;
+    download(svg, "image/svg+xml", `${filename}.svg`);
 });
 
 function download(content, mimeType, filename) {

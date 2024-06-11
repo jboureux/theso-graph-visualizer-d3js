@@ -17,3 +17,8 @@ body {
     align-items: center;
     gap: 3px;
 }
+
+.danger-text {
+    color: #cb0000;
+    font-weight: bold;
+}
