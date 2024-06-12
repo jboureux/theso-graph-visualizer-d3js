@@ -201,7 +201,7 @@ export class Graph {
             )
 
             .attr("fill", (d) =>
-                d3.color(this.color(this.isInTheso(d))).darker(2)
+                d3.color(this.color(this.isInTheso(d))).brighter(1)
             );
 
         nodes
@@ -223,7 +223,7 @@ export class Graph {
                 }
             })
             .attr("fill", (d) =>
-                d3.color(this.color(this.isInTheso(d))).brighter(1)
+                d3.color(this.color(this.isInTheso(d))).darker(2)
             )
             .attr("stroke", "none")
             .attr("text-anchor", "middle")
