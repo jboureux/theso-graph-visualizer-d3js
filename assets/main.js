@@ -31,14 +31,19 @@ document.querySelector("#show-data").addEventListener("click", (event) => {
 //Resize du svg lors du resize de l'ecran
 window.addEventListener("resize", () => {
     const svg = document.querySelector("#graph").firstChild;
-    svg.setAttribute("viewBox", [
-        -window.innerWidth / 2,
-        -window.innerHeight / 2,
-        window.innerWidth,
-        window.innerHeight,
-    ]);
-    svg.setAttribute("width", window.innerWidth);
-    svg.setAttribute("height", window.innerHeight);
+    if (svg != undefined) {
+        svg.setAttribute("viewBox", [
+            -window.innerWidth / 2,
+            -window.innerHeight / 2,
+            window.innerWidth,
+            window.innerHeight,
+        ]);
+        svg.setAttribute("width", window.innerWidth);
+        svg.setAttribute("height", window.innerHeight);
+    }
+});
+document.querySelector("#settings-button").addEventListener("click", () => {
+    document.querySelector("#settings-panel").classList.toggle("show-settings");
 });
 
 //Event checkbox affichage des labels
@@ -65,8 +70,17 @@ document.querySelector("#download-svg").addEventListener("click", () => {
 
 //Event changement filtre noeuds
 document.querySelector("#select-nodes").addEventListener("change", (event) => {
-    if (generatedGraph != undefined)
-        generatedGraph.render(lang, "select-nodes", "select-links");
+    if (generatedGraph != undefined) {
+        const graph = document.querySelector("#graph");
+        const zoom = document
+            .querySelector("#graph-content")
+            .getAttribute("transform");
+
+        graph.firstChild.innerHTML = null;
+        graph.appendChild(
+            generatedGraph.render("select-nodes", "select-links", zoom)
+        );
+    }
 });
 
 //Event changement filtre liens

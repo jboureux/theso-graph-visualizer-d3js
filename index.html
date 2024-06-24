@@ -13,10 +13,20 @@
     </head>
     <body>
         <div id="graph"></div>
+
+        <button
+            id="settings-button"
+            style="position: absolute; top: 5px; left: 5px"
+        >
+            Ouvrir/fermer le menu
+        </button>
+
         <div
+            id="settings-panel"
             style="
                 position: absolute;
-                top: 0;
+                top: 30px;
+                left: -1000px;
                 margin: 10px 0 0 10px;
                 background: #aaaaaa;
                 padding: 10px 10px 10px 10px;
@@ -53,7 +63,7 @@
                 </select>
             </div>
             <div class="legend-row-container">
-                <label>WIP - Noeuds affichés: </label>
+                <label>Noeuds affichés: </label>
                 <select id="select-nodes" multiple style="min-width: 500px">
                     <option value="skos__Concept" selected>Concept</option>
                     <option value="skos__Collection">Collection</option>

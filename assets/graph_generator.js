@@ -333,6 +333,8 @@ export class Graph {
         this.defineLinkArrowHead();
         const linksFilter = [];
         const nodesFilter = [];
+        this.filteredNodes = [];
+        this.filteredLinks = [];
         document
             .querySelectorAll(`#${selectFilterLinksId} option:checked`)
             .forEach((opt) => linksFilter.push(opt.value));
@@ -341,11 +343,40 @@ export class Graph {
             .querySelectorAll(`#${selectFilterNodesId} option:checked`)
             .forEach((opt) => nodesFilter.push(opt.value));
 
-        this.filteredLinks = this.dataLinks.filter((d) =>
-            linksFilter.includes(d.label)
-        );
+        this.filteredNodes = this.dataNodes.filter((d) => {
+            if (nodesFilter.includes("Resource")) {
+                const filterWithoutResource = nodesFilter.filter(
+                    (label) => label != "Resource"
+                );
+                return (
+                    (d.labels.includes("Resource") && d.labels.length == 1) ||
+                    d.labels.some((label) =>
+                        filterWithoutResource.includes(label)
+                    )
+                );
+            } else {
+                return d.labels.some((label) => nodesFilter.includes(label));
+            }
+        });
 
-        this.filteredNodes = this.dataNodes;
+        this.filteredLinks = this.dataLinks.filter(
+            (d) =>
+                linksFilter.includes(d.label) &&
+                this.filteredNodes.filter((node) => {
+                    if (typeof d.source === "string") {
+                        return d.source == node.id;
+                    } else {
+                        return d.source.id == node.id;
+                    }
+                }).length != 0 &&
+                this.filteredNodes.filter((node) => {
+                    if (typeof d.target === "string") {
+                        return d.target == node.id;
+                    } else {
+                        return d.target.id == node.id;
+                    }
+                }).length != 0
+        );
 
         const content = this.svg.append("g").attr("id", "graph-content");
 

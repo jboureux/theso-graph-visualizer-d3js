@@ -22,3 +22,11 @@ body {
     color: #cb0000;
     font-weight: bold;
 }
+
+.hidden {
+    display: none;
+}
+
+.show-settings {
+    transform: translateX(1000px);
+}
